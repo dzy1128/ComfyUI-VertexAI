@@ -17,7 +17,7 @@ Google Gemini 图像生成节点，用于 ComfyUI。
 
 ```bash
 cd ComfyUI/custom_nodes/
-git clone <repository_url> ComfyUI-VertexAI
+git clone https://github.com/dzy1128/ComfyUI-VertexAI.git
 ```
 
 ### 2. 安装依赖
