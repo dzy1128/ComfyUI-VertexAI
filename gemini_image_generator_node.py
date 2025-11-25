@@ -20,11 +20,14 @@ class GeminiImageGenerator:
                     "multiline": True,
                     "default": "Generate an image"
                 }),
-                "model_name": (["gemini-3-pro-image-preview"], {
+                "model_name": (["gemini-3-pro-image-preview", "gemini-2.5-flash-image-preview"], {
                     "default": "gemini-3-pro-image-preview"
                 }),
-                "image_resolution": (["1K", "2K", "4K", "1280x1920", "1920x1280", "1024x1024"], {
-                    "default": "1K"
+                "aspect_ratio": (["1:1", "16:9", "9:16", "4:3", "3:4", "21:9", "3:2", "2:3"], {
+                    "default": "1:1"
+                }),
+                "image_resolution": (["1K", "2K", "4K"], {
+                    "default": "2K"
                 }),
                 "seed": ("INT", {
                     "default": 0,
@@ -75,33 +78,8 @@ class GeminiImageGenerator:
         tensor = torch.from_numpy(np_image)[None,]
         return tensor
     
-    def parse_resolution(self, resolution_str):
-        """Parse resolution string to get aspect_ratio and image_size"""
-        # Handle specific dimensions like "1280x1920"
-        if "x" in resolution_str:
-            width, height = map(int, resolution_str.split("x"))
-            if width == height:
-                aspect_ratio = "1:1"
-            elif width > height:
-                aspect_ratio = "16:9"
-            else:
-                aspect_ratio = "9:16"
-            
-            # Convert to closest K size
-            max_dim = max(width, height)
-            if max_dim <= 1024:
-                image_size = "1K"
-            elif max_dim <= 2048:
-                image_size = "2K"
-            else:
-                image_size = "4K"
-            
-            return aspect_ratio, image_size
-        else:
-            # Handle K sizes
-            return "1:1", resolution_str
     
-    def generate_image(self, user_prompt, model_name, image_resolution, seed,
+    def generate_image(self, user_prompt, model_name, aspect_ratio, image_resolution, seed,
                        system_prompt="",
                        image_1=None, image_2=None, image_3=None, 
                        image_4=None, image_5=None, image_6=None):
@@ -110,6 +88,7 @@ class GeminiImageGenerator:
         info_dict = {
             "user_prompt": user_prompt,
             "model_name": model_name,
+            "aspect_ratio": aspect_ratio,
             "image_resolution": image_resolution,
             "start_time": start_time.strftime("%Y-%m-%d %H:%M:%S"),
             "success": False,
@@ -160,8 +139,8 @@ class GeminiImageGenerator:
                 )
             ]
             
-            # Parse resolution
-            aspect_ratio, image_size = self.parse_resolution(image_resolution)
+            # Use resolution directly (1K, 2K, 4K)
+            image_size = image_resolution
             
             # Configure generation
             generate_content_config = types.GenerateContentConfig(
@@ -228,7 +207,8 @@ class GeminiImageGenerator:
                 info_text = f"""=== Generation Info ===
 User Prompt: {user_prompt}
 Model Name: {model_name}
-Image Resolution: {image_resolution} (aspect_ratio: {aspect_ratio}, size: {image_size})
+Aspect Ratio: {aspect_ratio}
+Image Resolution: {image_resolution}
 Start Time: {info_dict["start_time"]}
 Generation Time: {info_dict["generation_time"]}
 Status: ✅ Success
@@ -249,6 +229,7 @@ Seed: {seed}
             info_text = f"""=== Generation Info ===
 User Prompt: {user_prompt}
 Model Name: {model_name}
+Aspect Ratio: {aspect_ratio}
 Image Resolution: {image_resolution}
 Start Time: {info_dict["start_time"]}
 Status: ❌ Failed

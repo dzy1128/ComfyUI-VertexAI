@@ -72,10 +72,22 @@ echo $GOOGLE_GENAI_USE_VERTEXAI
 #### 输入参数（必填）
 
 - **user_prompt**: 用户提示词（支持多行文本）
-- **model_name**: 模型名称（当前支持 `gemini-3-pro-image-preview`）
+- **model_name**: 模型名称
+  - `gemini-3-pro-image-preview`
+  - `gemini-2.5-flash-image-preview`
+- **aspect_ratio**: 图片宽高比
+  - `1:1` - 正方形
+  - `16:9` - 横屏
+  - `9:16` - 竖屏
+  - `4:3` - 传统横屏
+  - `3:4` - 传统竖屏
+  - `21:9` - 超宽屏
+  - `3:2` - 相机比例
+  - `2:3` - 相机竖屏
 - **image_resolution**: 图片分辨率
-  - 预设值：1K, 2K, 4K
-  - 具体尺寸：1280x1920, 1920x1280, 1024x1024
+  - `1K` - 约 1024 像素
+  - `2K` - 约 2048 像素
+  - `4K` - 约 4096 像素
 - **seed**: 随机种子（0 到 2^64-1）
 
 #### 输入参数（可选）
@@ -89,6 +101,7 @@ echo $GOOGLE_GENAI_USE_VERTEXAI
 - **info_text**: 生成信息文本，包含：
   - 用户提示词
   - 模型名称
+  - 图片宽高比
   - 图片分辨率
   - 生成时间
   - 生成状态（成功/失败）
@@ -106,6 +119,7 @@ echo $GOOGLE_GENAI_USE_VERTEXAI
 [Gemini Image Generator]
   user_prompt: "一个美丽的日落场景"
   model_name: gemini-3-pro-image-preview
+  aspect_ratio: 16:9
   image_resolution: 2K
   seed: 42
   
@@ -120,6 +134,7 @@ echo $GOOGLE_GENAI_USE_VERTEXAI
 ```
 [Load Image] → image_1 → [Gemini Image Generator]
   user_prompt: "将这张图片转换为油画风格"
+  aspect_ratio: 1:1
   image_resolution: 2K
   
   → image (连接到 Save Image)
@@ -143,17 +158,40 @@ echo $GOOGLE_GENAI_USE_VERTEXAI
 
 ## 参数详解
 
+### aspect_ratio 宽高比选项
+
+控制生成图片的宽高比例：
+
+- **1:1** - 正方形，适合头像、产品图
+- **16:9** - 横屏，适合电脑壁纸、视频封面
+- **9:16** - 竖屏，适合手机壁纸、社交媒体
+- **4:3** - 传统横屏，适合演示文稿
+- **3:4** - 传统竖屏，适合海报
+- **21:9** - 超宽屏，适合影院风格
+- **3:2** - 相机比例（横向）
+- **2:3** - 相机比例（竖向）
+
 ### image_resolution 分辨率选项
 
-**预设大小：**
-- `1K`: 约 1024 像素，快速生成
-- `2K`: 约 2048 像素，平衡质量和速度
-- `4K`: 约 4096 像素，最高质量
+控制生成图片的分辨率大小：
 
-**具体尺寸：**
-- `1024x1024`: 正方形
-- `1280x1920`: 竖屏（9:16）
-- `1920x1280`: 横屏（16:9）
+- **1K** - 约 1024 像素，快速生成，适合预览
+- **2K** - 约 2048 像素，平衡质量和速度，推荐使用
+- **4K** - 约 4096 像素，最高质量，生成较慢
+
+> 💡 提示：实际像素取决于宽高比。例如 16:9 + 2K 会生成约 2048x1152 的图片。
+
+### model_name 模型选择
+
+**gemini-3-pro-image-preview**
+- 高质量图像生成
+- 更好的细节表现
+- 适合专业创作
+
+**gemini-2.5-flash-image-preview**
+- 更快的生成速度
+- 轻量级模型
+- 适合快速迭代和预览
 
 ### seed 随机种子
 
